@@ -1,18 +1,34 @@
 version: 0.2
-
+env:
+  variables:
+      BC_SOURCE: "codebuild"
+  parameter-store:
+      BC_API_KEY: "bridgecrew_api_key"
 phases:
   install:
+    runtime-versions:
+      python: 3.7
     commands:
-      - echo Nothing to do in the install phase...
+       - pip3 install bridgecrew
+       - echo Installing codebuild-extras...
+       - curl -fsSL https://raw.githubusercontent.com/bridgecrewio/aws-codebuild-extras/master/install >> extras.sh
+       - . ./extras.sh
   pre_build:
     commands:
       - echo Nothing to do in the pre_build phase...
   build:
     commands:
-      - echo Build started on `date`
+       - bridgecrew -d . --bc-api-key $BC_API_KEY --repo-id $CODEBUILD_ACCOUNT_ID/$CODEBUILD_PROJECT --branch $CODEBUILD_GIT_BRANCH -s
+       - bridgecrew -d . -o junitxml > test_results.xml
   post_build:
     commands:
       - echo Build completed on `date`
+reports:
+  bridgecrew-infrastructure-security:
+    files:
+       - test_results.xml
+    discard-paths: yes
+    file-format: JunitXml
 artifacts:
   files:
     - '*'
