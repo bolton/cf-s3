@@ -5,7 +5,7 @@ locals {
 data "aws_canonical_user_id" "current" {}
 
 resource "random_pet" "this" {
-  length = 2
+  length = 3
 }
 
 resource "aws_kms_key" "objects" {
